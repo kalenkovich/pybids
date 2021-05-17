@@ -3,20 +3,19 @@ from bids.variables.entities import RunNode, Node, NodeIndex
 from bids.variables import load_variables
 from bids.variables import BIDSRunVariableCollection
 import pytest
-from os.path import join
 from bids.tests import get_test_data_path
 
 
 @pytest.fixture(scope="module")
 def layout1():
-    path = join(get_test_data_path(), 'ds005')
+    path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(path)
     return layout
 
 
 @pytest.fixture(scope="module")
 def layout2():
-    path = join(get_test_data_path(), '7t_trt')
+    path = get_test_data_path() / '7t_trt'
     layout = BIDSLayout(path)
     return layout
 

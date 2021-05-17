@@ -37,7 +37,7 @@ def test_layout(runner, tmp_path):
     res = runner.invoke(cli, ['layout', '--help'])
     assert "Initialize a BIDSLayout" in res.stdout
 
-    bids_dir = os.path.join(get_test_data_path(), 'ds005')
+    bids_dir = get_test_data_path() / 'ds005'
     db0 = tmp_path / "db0"
     db0.mkdir()
     res = runner.invoke(cli, ['layout', bids_dir, str(db0)], catch_exceptions=False)

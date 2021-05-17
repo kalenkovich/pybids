@@ -1,4 +1,3 @@
-from os.path import join
 from bids.analysis.auto_model import auto_model
 from bids.analysis import Analysis
 from bids.layout import BIDSLayout
@@ -8,7 +7,7 @@ import pytest
 
 @pytest.fixture
 def model():
-    layout_path = join(get_test_data_path(), 'ds005')
+    layout_path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(layout_path)
 
     models = auto_model(layout, scan_length=480, one_vs_rest=True)
@@ -18,7 +17,7 @@ def model():
 
 def test_auto_model_analysis(model):
 
-    layout_path = join(get_test_data_path(), 'ds005')
+    layout_path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(layout_path)
 
     # Test to make sure an analaysis can be setup from the generated model

@@ -2,10 +2,8 @@
 dataset.
 """
 import json
-from os.path import dirname
-from os.path import abspath
-from os.path import join as pathjoin
 from collections import Counter
+from pathlib import Path
 
 from bids.reports import utils
 from bids.reports import parsing
@@ -36,8 +34,8 @@ class BIDSReport(object):
     def __init__(self, layout, config=None):
         self.layout = layout
         if config is None:
-            config = pathjoin(dirname(abspath(__file__)), 'config',
-                              'converters.json')
+            config = (Path(__file__).absolute().parent / 'config'
+                      / 'converters.json')
 
         if isinstance(config, str):
             with open(config) as fobj:
@@ -69,11 +67,10 @@ class BIDSReport(object):
 
         Examples
         --------
-        >>> from os.path import join
         >>> from bids.layout import BIDSLayout
         >>> from bids.reports import BIDSReport
         >>> from bids.tests import get_test_data_path
-        >>> layout = BIDSLayout(join(get_test_data_path(), 'synthetic'))
+        >>> layout = BIDSLayout(get_test_data_path() / 'synthetic')
         >>> report = BIDSReport(layout)
         >>> files = layout.get(session='01', extension=['.nii.gz', '.nii'])
         >>> counter = report.generate_from_files(files)
@@ -138,11 +135,10 @@ class BIDSReport(object):
 
         Examples
         --------
-        >>> from os.path import join
         >>> from bids.layout import BIDSLayout
         >>> from bids.reports import BIDSReport
         >>> from bids.tests import get_test_data_path
-        >>> layout = BIDSLayout(join(get_test_data_path(), 'synthetic'))
+        >>> layout = BIDSLayout(get_test_data_path() / 'synthetic')
         >>> report = BIDSReport(layout)
         >>> counter = report.generate(session='01')
         Number of patterns detected: 1

@@ -1,5 +1,3 @@
-from os.path import join, dirname, abspath
-
 import pytest
 import numpy as np
 
@@ -11,7 +9,7 @@ from bids.variables.entities import RunInfo
 
 @pytest.fixture(scope="module")
 def run_coll():
-    path = join(get_test_data_path(), 'ds005')
+    path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(path)
     # Limit to a few subjects to reduce test running time
     return layout.get_collections('run', types=['events'], merge=True,
@@ -19,7 +17,7 @@ def run_coll():
 
 @pytest.fixture(scope="module")
 def run_coll_bad_length():
-    path = join(get_test_data_path(), 'ds005')
+    path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(path)
     # Limit to a few subjects to reduce test running time
     return layout.get_collections('run', types=['events'], merge=True,
@@ -28,7 +26,7 @@ def run_coll_bad_length():
 
 @pytest.fixture(scope="module")
 def run_coll_list():
-    path = join(get_test_data_path(), 'ds005')
+    path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(path)
     return layout.get_collections('run', types=['events'], merge=False,
                                   scan_length=480, subject=['01', '02', '04'])

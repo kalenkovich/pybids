@@ -2,7 +2,7 @@
 
 import shutil
 import os
-from os.path import join, exists, islink, dirname
+from pathlib import Path
 
 import pytest
 from sqlalchemy import create_engine
@@ -24,7 +24,7 @@ def writable_file(tmpdir):
     testfile = 'sub-03_ses-2_task-rest_acq-fullbrain_run-2_bold.nii.gz'
     fn = tmpdir.mkdir("tmp").join(testfile)
     fn.write('###')
-    bf = BIDSFile(os.path.join(str(fn)))
+    bf = BIDSFile(str(fn))
 
     tag_dict = {
         'task': 'rest',
@@ -47,16 +47,16 @@ def tmp_bids(tmpdir_factory):
     shutil.rmtree(str(tmp_bids))
     # Ugly hack
     try:
-        shutil.rmtree(join(get_test_data_path(), '7t_trt', 'sub-Bob'))
+        shutil.rmtree(get_test_data_path() / '7t_trt' / 'sub-Bob')
     except:
         pass
 
 
 @pytest.fixture(scope='module')
 def layout(tmp_bids):
-    orig_dir = join(get_test_data_path(), '7t_trt')
+    orig_dir = get_test_data_path() / '7t_trt'
     # return BIDSLayout(data_dir, absolute_paths=False)
-    new_dir = join(str(tmp_bids), 'bids')
+    new_dir = tmp_bids / 'bids'
     os.symlink(orig_dir, new_dir)
     return BIDSLayout(new_dir)
 
@@ -103,49 +103,49 @@ sub-{subject}[/ses-{session}]/anat/sub-{subject}[_ses-{session}][_acq-{acquisiti
         ]
 
     def test_build_path(self, writable_file):
+        writable_dir = Path(writable_file.dirname)
 
         # Single simple pattern
         with pytest.raises(TypeError):
             build_path(writable_file.entities)
-        pat = join(writable_file.dirname,
-                   '{task}/sub-{subject}/run-{run}.nii.gz')
-        target = join(writable_file.dirname, 'rest/sub-3/run-2.nii.gz')
+        pat = writable_dir / '{task}/sub-{subject}/run-{run}.nii.gz'
+        target = writable_dir / 'rest/sub-3/run-2.nii.gz'
         assert build_path(writable_file.entities, pat) == target
 
         # Multiple simple patterns
         pats = ['{session}/{task}/r-{run}.nii.gz',
                 't-{task}/{subject}-{run}.nii.gz',
                 '{subject}/{task}.nii.gz']
-        pats = [join(writable_file.dirname, p) for p in pats]
-        target = join(writable_file.dirname, 't-rest/3-2.nii.gz')
+        pats = [writable_dir / p for p in pats]
+        target = writable_dir / 't-rest/3-2.nii.gz'
         assert build_path(writable_file.entities, pats) == target
 
         # Pattern with optional entity
         pats = ['[{session}/]{task}/r-{run}.nii.gz',
                 't-{task}/{subject}-{run}.nii.gz']
-        pats = [join(writable_file.dirname, p) for p in pats]
-        target = join(writable_file.dirname, 'rest/r-2.nii.gz')
+        pats = [writable_dir/ p for p in pats]
+        target = writable_dir / 'rest/r-2.nii.gz'
         assert build_path(writable_file.entities, pats) == target
 
         # Pattern with conditional values
         pats = ['{task<func|acq>}/r-{run}.nii.gz',
                 't-{task}/{subject}-{run}.nii.gz']
-        pats = [join(writable_file.dirname, p) for p in pats]
-        target = join(writable_file.dirname, 't-rest/3-2.nii.gz')
+        pats = [writable_dir / p for p in pats]
+        target = writable_dir / 't-rest/3-2.nii.gz'
         assert build_path(writable_file.entities, pats) == target
 
         # Pattern with valid conditional values
         pats = ['{task<func|rest>}/r-{run}.nii.gz',
                 't-{task}/{subject}-{run}.nii.gz']
-        pats = [join(writable_file.dirname, p) for p in pats]
-        target = join(writable_file.dirname, 'rest/r-2.nii.gz')
+        pats = [writable_dir/ p for p in pats]
+        target = writable_dir / 'rest/r-2.nii.gz'
         assert build_path(writable_file.entities, pats) == target
 
         # Pattern with optional entity with conditional values
         pats = ['[{task<func|acq>}/]r-{run}.nii.gz',
                 't-{task}/{subject}-{run}.nii.gz']
-        pats = [join(writable_file.dirname, p) for p in pats]
-        target = join(writable_file.dirname, 'r-2.nii.gz')
+        pats = [writable_dir / p for p in pats]
+        target = writable_dir / 'r-2.nii.gz'
         assert build_path(writable_file.entities, pats) == target
 
         # Pattern with default value
@@ -213,14 +213,15 @@ sub-{subject}[/ses-{session}]/anat/sub-{subject}[_ses-{session}][_acq-{acquisiti
         assert not build_path(entities, pats, True)
 
     def test_build_file(self, writable_file, tmp_bids, caplog):
+        writable_dir = Path(writable_file.dirname)
 
         # Simple write out
-        new_dir = join(writable_file.dirname, 'rest')
-        pat = join(writable_file.dirname,
-                   '{task}/sub-{subject}/run-{run}.nii.gz')
-        target = join(writable_file.dirname, 'rest/sub-3/run-2.nii.gz')
+        new_dir = writable_file.dirname / 'rest'
+        pat = writable_dir / '{task}' / 'sub-{subject}' / 'run-{run}.nii.gz'
+        target = writable_dir / 'rest' / 'sub-3' / 'run-2.nii.gz'
+        # TODO: can copy take Path? If so, update its docs
         writable_file.copy(pat)
-        assert exists(target)
+        assert target.exists()
 
         # Conflict handling
         with pytest.raises(ValueError):
@@ -233,30 +234,29 @@ sub-{subject}[/ses-{session}]/anat/sub-{subject}[_ses-{session}][_acq-{acquisiti
             assert log_message == 'A file at path {} already exists, ' \
                                   'skipping writing file.'.format(target)
         writable_file.copy(pat, conflicts='append')
-        append_target = join(writable_file.dirname,
-                             'rest/sub-3/run-2_1.nii.gz')
-        assert exists(append_target)
+        append_target = writable_dir / 'rest' / 'sub-3' / 'run-2_1.nii.gz'
+        assert append_target.exists()
         writable_file.copy(pat, conflicts='overwrite')
-        assert exists(target)
+        assert target.exists()
         shutil.rmtree(new_dir)
 
         # Symbolic linking
         writable_file.copy(pat, symbolic_link=True)
-        assert islink(target)
+        assert target.is_symlink()
         shutil.rmtree(new_dir)
 
         # Using different root
-        root = str(tmp_bids.mkdir('tmp2'))
-        pat = join(root, '{task}/sub-{subject}/run-{run}.nii.gz')
-        target = join(root, 'rest/sub-3/run-2.nii.gz')
-        writable_file.copy(pat, root=root)
-        assert exists(target)
+        root = Path(tmp_bids.mkdir('tmp2'))
+        pat = root / '{task}' / 'sub-{subject}' / 'run-{run}.nii.gz'
+        target = root / 'rest' / 'sub-3' / 'run-2.nii.gz'
+        writable_file.copy(pat, root=str(root))
+        assert target.exists()
 
         # Copy into directory functionality
-        pat = join(writable_file.dirname, '{task}/')
+        pat = writable_dir / '{task}/'
         writable_file.copy(pat)
-        target = join(writable_file.dirname, 'rest', writable_file.filename)
-        assert exists(target)
+        target = writable_dir / 'rest' / writable_file.filename
+        assert target.exists()
         shutil.rmtree(new_dir)
 
 
@@ -264,59 +264,65 @@ class TestWritableLayout:
 
     def test_write_files(self, tmp_bids, layout):
 
-        tmpdir = str(tmp_bids)
-        pat = join(str(tmpdir), 'sub-{subject<02>}'
-                                '/ses-{session}'
-                                '/r-{run}'
-                                '/suffix-{suffix}'
-                                '/acq-{acquisition}'
-                                '/task-{task}.nii.gz')
-        layout.copy_files(path_patterns=pat)
-        example_file = join(str(tmpdir), 'sub-02'
-                                         '/ses-2'
-                                         '/r-1'
-                                         '/suffix-bold'
-                                         '/acq-fullbrain'
-                                         '/task-rest.nii.gz')
-        example_file2 = join(str(tmpdir), 'sub-01'
-                                          '/ses-2'
-                                          '/r-1'
-                                          '/suffix-bold'
-                                          '/acq-fullbrain'
-                                          '/task-rest.nii.gz')
+        tmpdir = Path(tmp_bids)
+        pat = (tmpdir
+               / 'sub-{subject<02>}'
+               / '/ses-{session}'
+               / '/r-{run}'
+               / '/suffix-{suffix}'
+               / '/acq-{acquisition}'
+               / '/task-{task}.nii.gz')
+        # TODO: copy_files takes str or list, can it take Path?
+        layout.copy_files(path_patterns=str(pat))
+        example_file = (tmpdir
+                        / 'sub-02'
+                        / '/ses-2'
+                        / '/r-1'
+                        / '/suffix-bold'
+                        / '/acq-fullbrain'
+                        / '/task-rest.nii.gz')
+        example_file2 = (tmpdir
+                         / 'sub-01'
+                         / '/ses-2'
+                         / '/r-1'
+                         / '/suffix-bold'
+                         / '/acq-fullbrain'
+                         / '/task-rest.nii.gz')
 
-        assert exists(example_file)
-        assert not exists(example_file2)
+        assert example_file.exists()
+        assert not example_file2.exists()
 
-        pat = join(str(tmpdir), 'sub-{subject<01>}'
-                                '/ses-{session}'
-                                '/r-{run}'
-                                '/suffix-{suffix}'
-                                '/task-{task}.nii.gz')
-        example_file = join(str(tmpdir), 'sub-01'
-                                         '/ses-2'
-                                         '/r-1'
-                                         '/suffix-bold'
-                                         '/task-rest.nii.gz')
+        pat = (tmpdir
+               / 'sub-{subject<01>}'
+               / '/ses-{session}'
+               / '/r-{run}'
+               / '/suffix-{suffix}'
+               / '/task-{task}.nii.gz')
+        example_file = (tmpdir
+                        / 'sub-01'
+                        / '/ses-2'
+                        / '/r-1'
+                        / '/suffix-bold'
+                        / '/task-rest.nii.gz')
         # Should fail without the 'overwrite' because there are multiple
         # files that produce the same path.
         with pytest.raises(ValueError):
-            layout.copy_files(path_patterns=pat)
+            layout.copy_files(path_patterns=str(pat))
         try:
             os.remove(example_file)
         except OSError:
             pass
-        layout.copy_files(path_patterns=pat, conflicts='overwrite')
-        assert exists(example_file)
+        layout.copy_files(path_patterns=str(pat), conflicts='overwrite')
+        assert example_file.exists()
 
     def test_write_to_file(self, tmp_bids, layout):
         contents = 'test'
         entities = {'subject': 'Bob', 'session': '01'}
-        pat = join('sub-{subject}/ses-{session}/desc.txt')
+        pat = 'sub-{subject}/ses-{session}/desc.txt'
         layout.write_to_file(entities, path_patterns=pat,
                                       contents=contents, validate=False)
-        target = join(str(tmp_bids), 'bids', 'sub-Bob/ses-01/desc.txt')
-        assert exists(target)
+        target = Path(tmp_bids) / 'bids' / 'sub-Bob' / 'ses-01' / 'desc.txt'
+        assert target.exists()
         with open(target) as f:
             written = f.read()
         assert written == contents
@@ -328,23 +334,25 @@ class TestWritableLayout:
                     'suffix': 'bold', 'task': 'test', 'acquisition': 'test',
                     'bval': 0}
         layout.write_to_file(entities, contents=contents)
-        target = join(str(tmp_bids), 'bids', 'sub-Bob', 'ses-01',
-                      'func', 'sub-Bob_ses-01_task-test_acq-test_run-1_bold.nii.gz')
-        assert exists(target)
+        target = (Path(tmp_bids) / 'bids' / 'sub-Bob' / 'ses-01' / 'func'
+                  / 'sub-Bob_ses-01_task-test_acq-test_run-1_bold.nii.gz')
+        assert target.exists()
         with open(target) as f:
             written = f.read()
         assert written == contents
 
     def test_build_file_from_layout(self, tmpdir, layout):
         entities = {'subject': 'Bob', 'session': '01', 'run': '1'}
-        pat = join(str(tmpdir), 'sub-{subject}'
-                   '/ses-{session}'
-                   '/r-{run}.nii.gz')
-        path = layout.build_path(entities, path_patterns=pat, validate=False)
-        assert path == join(str(tmpdir), 'sub-Bob/ses-01/r-1.nii.gz')
+        pat = (Path(tmpdir)
+               / 'sub-{subject}'
+               / 'ses-{session}'
+               / 'r-{run}.nii.gz')
+        path = layout.build_path(entities, path_patterns=str(pat),
+                                 validate=False)
+        assert path == Path(tmpdir) / 'sub-Bob/ses-01/r-1.nii.gz'
 
-        data_dir = join(dirname(__file__), 'data', '7t_trt')
+        data_dir = Path(__file__).parent / 'data' / '7t_trt'
         filename = 'sub-04_ses-1_task-rest_acq-fullbrain_run-1_physio.tsv.gz'
-        file = join('sub-04', 'ses-1', 'func', filename)
-        path = layout.build_path(file, path_patterns=pat, validate=False)
+        file = Path('sub-04', 'ses-1', 'func', filename)
+        path = layout.build_path(file, path_patterns=str(pat), validate=False)
         assert path.endswith('sub-04/ses-1/r-1.nii.gz')
