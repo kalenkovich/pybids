@@ -1,21 +1,20 @@
 ''' Utilities for manipulating package-level settings. '''
 
 import json
-from os.path import join, expanduser, exists
+from pathlib import Path
 import os
-from io import open
 import warnings
 
 __all__ = ['set_option', 'set_options', 'get_option']
 
 _config_name = 'pybids_config.json'
 
-conf_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                         'layout', 'config', '{}.json')
+conf_path = Path(__file__).absolute().parent / 'layout' / 'config'
 _default_settings = {
     # XXX 0.14: Remove bids-nodot option (and file)
     'config_paths': {
-        name: conf_path.format(name) for name in ['bids', 'derivatives', 'bids-nodot']},
+        name: conf_path / '{}.json'.format(name)
+        for name in ['bids', 'derivatives', 'bids-nodot']},
     # XXX 0.14: Set to True
     'extension_initial_dot': None,
 }
@@ -68,11 +67,14 @@ def from_file(filenames, error_on_missing=True):
         error_on_missing (bool): If True, raises an error if a file doesn't
             exist.
     """
-    if isinstance(filenames, str):
+    if isinstance(filenames, (str, Path)):
         filenames = [filenames]
     for f in filenames:
-        if exists(f):
-            with open(f, 'r', encoding='utf-8') as fobj:
+        if not isinstance(f, Path):
+            f = Path(f)
+
+        if f.exists():
+            with f.open('r', encoding='utf-8') as fobj:
                 settings = json.load(fobj)
             _settings.update(settings)
         elif error_on_missing:
@@ -98,8 +100,8 @@ def _update_from_standard_locations():
     current directory--with later files taking precedence over earlier ones.
     """
     locs = [
-        join(expanduser('~'), _config_name),
-        join('.', _config_name)
+        Path.home() / _config_name,
+        Path('.', _config_name)
     ]
     if 'PYBIDS_CONFIG' in os.environ:
         locs.insert(1, os.environ['PYBIDS_CONFIG'])

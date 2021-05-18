@@ -11,10 +11,10 @@
 """Git implementation of _version.py."""
 
 import errno
-import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 
 def get_keywords():
@@ -114,14 +114,14 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
     rootdirs = []
 
     for i in range(3):
-        dirname = os.path.basename(root)
+        dirname = Path(root).name
         if dirname.startswith(parentdir_prefix):
             return {"version": dirname[len(parentdir_prefix):],
                     "full-revisionid": None,
                     "dirty": False, "error": None, "date": None}
         else:
             rootdirs.append(root)
-            root = os.path.dirname(root)  # up a level
+            root = Path(root).parent  # up a level
 
     if verbose:
         print("Tried directories %s but none started with prefix %s" %
@@ -491,12 +491,11 @@ def get_versions():
         pass
 
     try:
-        root = os.path.realpath(__file__)
         # versionfile_source is the relative path from the top of the source
         # tree (where the .git directory might live) to this file. Invert
         # this to find the root from __file__.
-        for i in cfg.versionfile_source.split(os.path.sep):
-            root = os.path.dirname(root)
+        depth = len(Path(cfg.versionfile_source).parts)
+        root = Path(__file__).resolve().parents[depth - 1]
     except NameError:
         return {"version": "0+unknown", "full-revisionid": None,
                 "dirty": None,
