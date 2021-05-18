@@ -12,7 +12,7 @@ from bids.variables import BIDSVariableCollection
 
 @pytest.fixture
 def analysis():
-    layout_path = join(get_test_data_path(), "ds005")
+    layout_path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(layout_path)
     json_file = join(layout_path, "models", "ds-005_type-test_model.json")
     analysis = Analysis(layout, json_file)
@@ -40,7 +40,7 @@ def test_first_level_sparse_design_matrix(analysis):
 
 
 def test_incremental_data_loading():
-    layout_path = join(get_test_data_path(), "ds005")
+    layout_path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(layout_path)
     json_file = join(layout_path, "models", "ds-005_type-test_model.json")
     analysis = Analysis(layout, json_file)

@@ -5,6 +5,7 @@ import json
 from os.path import dirname
 from os.path import abspath
 from os.path import join as pathjoin
+from pathlib import Path
 from collections import Counter
 
 from bids.reports import utils
@@ -39,7 +40,7 @@ class BIDSReport(object):
             config = pathjoin(dirname(abspath(__file__)), 'config',
                               'converters.json')
 
-        if isinstance(config, str):
+        if isinstance(config, (str, Path)):
             with open(config) as fobj:
                 config = json.load(fobj)
 
@@ -73,7 +74,7 @@ class BIDSReport(object):
         >>> from bids.layout import BIDSLayout
         >>> from bids.reports import BIDSReport
         >>> from bids.tests import get_test_data_path
-        >>> layout = BIDSLayout(join(get_test_data_path(), 'synthetic'))
+        >>> layout = BIDSLayout(get_test_data_path() / 'synthetic')
         >>> report = BIDSReport(layout)
         >>> files = layout.get(session='01', extension=['.nii.gz', '.nii'])
         >>> counter = report.generate_from_files(files)
@@ -142,7 +143,7 @@ class BIDSReport(object):
         >>> from bids.layout import BIDSLayout
         >>> from bids.reports import BIDSReport
         >>> from bids.tests import get_test_data_path
-        >>> layout = BIDSLayout(join(get_test_data_path(), 'synthetic'))
+        >>> layout = BIDSLayout(get_test_data_path() / 'synthetic')
         >>> report = BIDSReport(layout)
         >>> counter = report.generate(session='01')
         Number of patterns detected: 1

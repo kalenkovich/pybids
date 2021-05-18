@@ -1,6 +1,5 @@
 """Tests of path-building functionality."""
 
-from os.path import join
 from pathlib import Path
 
 import pytest
@@ -10,7 +9,7 @@ from bids.tests import get_test_data_path
 
 @pytest.fixture(scope='module')
 def layout():
-    data_dir = join(get_test_data_path(), '7t_trt')
+    data_dir = get_test_data_path() / '7t_trt'
     return BIDSLayout(data_dir)
 
 

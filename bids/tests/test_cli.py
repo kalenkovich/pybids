@@ -1,5 +1,3 @@
-import os
-
 from click.testing import CliRunner
 import pytest
 
@@ -37,17 +35,22 @@ def test_layout(runner, tmp_path):
     res = runner.invoke(cli, ['layout', '--help'])
     assert "Initialize a BIDSLayout" in res.stdout
 
-    bids_dir = os.path.join(get_test_data_path(), 'ds005')
+    bids_dir = get_test_data_path() / 'ds005'
     db0 = tmp_path / "db0"
     db0.mkdir()
-    res = runner.invoke(cli, ['layout', bids_dir, str(db0)], catch_exceptions=False)
+    res = runner.invoke(
+        cli, ['layout', str(bids_dir), str(db0)],
+        catch_exceptions=False)
     assert is_success(res)
     # rerunning targeting the save directory should not generate a new index
-    res = runner.invoke(cli, ['layout', bids_dir, str(db0)], catch_exceptions=False)
+    res = runner.invoke(
+        cli, ['layout', str(bids_dir), str(db0)],
+        catch_exceptions=False)
     assert not is_success(res)
     # but forcing it should
     res = runner.invoke(
-        cli, ['layout', bids_dir, str(db0), '--reset-db'], catch_exceptions=False
+        cli, ['layout', str(bids_dir), str(db0), '--reset-db'],
+        catch_exceptions=False
     )
     assert is_success(res)
 
@@ -57,7 +60,7 @@ def test_layout(runner, tmp_path):
     res = runner.invoke(
         cli,
         [
-            'layout', bids_dir, str(db1),
+            'layout', str(bids_dir), str(db1),
             '--validate', '--no-index-metadata',
             '--ignore', 'derivatives', '--ignore', 'sourcedata', '--ignore', r'm/^\./',
             '--force-index', 'test',

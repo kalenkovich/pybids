@@ -53,7 +53,7 @@ def test_set_option():
 
 
 def test_extension_initial_dot(mock_config):
-    ds117 = os.path.join(get_test_data_path(), 'ds000117')
+    ds117 = get_test_data_path() / 'ds000117'
 
     # Warn if creating a layout without declaring a mode
     bids.config.set_option('extension_initial_dot', None)

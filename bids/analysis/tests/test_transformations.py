@@ -6,7 +6,7 @@ from bids.variables.collections import BIDSRunVariableCollection
 from bids.layout import BIDSLayout
 import math
 import pytest
-from os.path import join, sep
+from os.path import sep
 from bids.tests import get_test_data_path
 import numpy as np
 import pandas as pd
@@ -29,7 +29,7 @@ cached_collections = {}
 @pytest.fixture
 def collection():
     if 'ds005' not in cached_collections:
-        layout_path = join(get_test_data_path(), 'ds005')
+        layout_path = get_test_data_path() / 'ds005'
         layout = BIDSLayout(layout_path)
         cached_collections['ds005'] = layout.get_collections(
             'run',

@@ -4,14 +4,13 @@ from bids.variables import (SparseRunVariable, SimpleVariable,
 from bids.variables.entities import Node, RunNode, NodeIndex
 from unittest.mock import patch
 import pytest
-from os.path import join
 from bids.tests import get_test_data_path
 from bids.config import set_option, get_option
 
 
 @pytest.fixture
 def layout1():
-    path = join(get_test_data_path(), 'ds005')
+    path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(path)
     return layout
 
@@ -22,7 +21,7 @@ def synthetic(request):
     # Not testing with/without here
     with patch.dict('bids.config._settings'):
         bids.config.set_option('extension_initial_dot', True)
-        root = join(get_test_data_path(), 'synthetic')
+        root = get_test_data_path() / 'synthetic'
         if request.param == 'preproc':
             layout = BIDSLayout(root, derivatives=True)
             dataset = load_variables(layout, skip_empty=True, desc='preproc',

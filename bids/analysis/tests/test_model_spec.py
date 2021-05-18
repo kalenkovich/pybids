@@ -25,7 +25,7 @@ def collection():
 
 
 def test_bids_variable_collection_to_model_design(collection):
-    layout_path = join(get_test_data_path(), 'ds005')
+    layout_path = get_test_data_path() / 'ds005'
     json_file = join(layout_path, 'models', 'ds-005_type-mfx_model.json')
     spec = json.load(open(json_file, 'r'))
     tm = TransformerManager()

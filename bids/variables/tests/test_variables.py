@@ -1,7 +1,6 @@
 from bids.layout import BIDSLayout
 import pytest
 import os
-from os.path import join
 from bids.tests import get_test_data_path
 from bids.variables import (merge_variables, DenseRunVariable, SimpleVariable,
                             load_variables)
@@ -26,14 +25,14 @@ def generate_DEV(name='test', sr=20, duration=480):
 
 @pytest.fixture
 def layout1():
-    path = join(get_test_data_path(), 'ds005')
+    path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(path)
     return layout
 
 
 @pytest.fixture(scope="module")
 def layout2():
-    path = join(get_test_data_path(), '7t_trt')
+    path = get_test_data_path() / '7t_trt'
     layout = BIDSLayout(path)
     return layout
 

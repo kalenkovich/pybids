@@ -3,7 +3,6 @@ tests for bids.reports.report
 """
 import json
 from collections import Counter
-from os.path import join, abspath
 
 import pytest
 
@@ -14,7 +13,7 @@ from bids.tests import get_test_data_path
 
 @pytest.fixture
 def testlayout():
-    data_dir = join(get_test_data_path(), 'synthetic')
+    data_dir = get_test_data_path() / 'synthetic'
     return BIDSLayout(data_dir)
 
 
@@ -66,8 +65,8 @@ def test_report_file_config(testlayout):
     """Report initialization should take in a config file and use that if
     provided.
     """
-    config_file = abspath(join(get_test_data_path(),
-                               '../../reports/config/converters.json'))
+    config_file = (get_test_data_path() / '..' / '..' / 'reports' / 'config'
+                   / 'converters.json').absolute()
     report = BIDSReport(testlayout, config=config_file)
     descriptions = report.generate()
     assert isinstance(descriptions, Counter)
@@ -77,8 +76,8 @@ def test_report_dict_config(testlayout):
     """Report initialization should take in a config dict and use that if
     provided.
     """
-    config_file = abspath(join(get_test_data_path(),
-                               '../../reports/config/converters.json'))
+    config_file = (get_test_data_path() / '..' / '..' / 'reports' / 'config'
+                   / 'converters.json').absolute()
     with open(config_file, 'r') as fobj:
         config = json.load(fobj)
     report = BIDSReport(testlayout, config=config)

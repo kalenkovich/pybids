@@ -47,14 +47,14 @@ def tmp_bids(tmpdir_factory):
     shutil.rmtree(str(tmp_bids))
     # Ugly hack
     try:
-        shutil.rmtree(join(get_test_data_path(), '7t_trt', 'sub-Bob'))
+        shutil.rmtree(get_test_data_path() / '7t_trt' / 'sub-Bob')
     except:
         pass
 
 
 @pytest.fixture(scope='module')
 def layout(tmp_bids):
-    orig_dir = join(get_test_data_path(), '7t_trt')
+    orig_dir = get_test_data_path() / '7t_trt'
     # return BIDSLayout(data_dir, absolute_paths=False)
     new_dir = join(str(tmp_bids), 'bids')
     os.symlink(orig_dir, new_dir)

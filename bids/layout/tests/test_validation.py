@@ -887,7 +887,7 @@ def test_index_associated_false(testvalidator):
         assert not result
 
 def test_layout_with_validation():
-    data_dir = join(get_test_data_path(), '7t_trt')
+    data_dir = get_test_data_path() / '7t_trt'
     layout1 = BIDSLayout(data_dir, validate=True)
     layout2 = BIDSLayout(data_dir, validate=False)
     assert len(layout1.files) < len(layout2.files)
