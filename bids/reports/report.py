@@ -2,9 +2,6 @@
 dataset.
 """
 import json
-from os.path import dirname
-from os.path import abspath
-from os.path import join as pathjoin
 from pathlib import Path
 from collections import Counter
 
@@ -37,8 +34,8 @@ class BIDSReport(object):
     def __init__(self, layout, config=None):
         self.layout = layout
         if config is None:
-            config = pathjoin(dirname(abspath(__file__)), 'config',
-                              'converters.json')
+            config = (Path(__file__).absolute().parent / 'config'
+                      / 'converters.json')
 
         if isinstance(config, (str, Path)):
             with open(config) as fobj:
@@ -70,7 +67,6 @@ class BIDSReport(object):
 
         Examples
         --------
-        >>> from os.path import join
         >>> from bids.layout import BIDSLayout
         >>> from bids.reports import BIDSReport
         >>> from bids.tests import get_test_data_path
@@ -139,7 +135,6 @@ class BIDSReport(object):
 
         Examples
         --------
-        >>> from os.path import join
         >>> from bids.layout import BIDSLayout
         >>> from bids.reports import BIDSReport
         >>> from bids.tests import get_test_data_path
