@@ -1,5 +1,3 @@
-from os.path import join
-
 import numpy as np
 import pytest
 
@@ -14,7 +12,7 @@ from bids.variables import BIDSVariableCollection
 def analysis():
     layout_path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(layout_path)
-    json_file = join(layout_path, "models", "ds-005_type-test_model.json")
+    json_file = layout_path / "models" / "ds-005_type-test_model.json"
     analysis = Analysis(layout, json_file)
     analysis.setup(scan_length=480, subject=["01", "02"])
     return analysis
@@ -42,7 +40,7 @@ def test_first_level_sparse_design_matrix(analysis):
 def test_incremental_data_loading():
     layout_path = get_test_data_path() / 'ds005'
     layout = BIDSLayout(layout_path)
-    json_file = join(layout_path, "models", "ds-005_type-test_model.json")
+    json_file = layout_path / "models" / "ds-005_type-test_model.json"
     analysis = Analysis(layout, json_file)
     analysis.setup(scan_length=480, subject=["01"], run=[1], finalize=False)
     analysis.setup(scan_length=480, subject=["02"], run=[2], finalize=False)

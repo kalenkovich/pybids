@@ -3,6 +3,7 @@
 import json
 from collections import namedtuple, OrderedDict
 from itertools import chain
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -52,7 +53,7 @@ class Analysis(object):
 
 
     def _load_model(self, model):
-        if isinstance(model, str):
+        if isinstance(model, (str, Path)):
             with open(model, 'r', encoding='utf-8') as fobj:
                 model = json.load(fobj)
 

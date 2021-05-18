@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import bids
 import tempfile
 import os
@@ -19,7 +21,7 @@ def test_load_from_standard_paths():
     json.dump(env_config, open(f, 'w'))
     os.environ['PYBIDS_CONFIG'] = f
     target = 'pybids_config.json'
-    if os.path.exists(target):
+    if Path(target).exists():
         pytest.skip("Cannot test bids config because the default config file"
                     " (pybids_config.json) already exists in the current "
                     "working directory. Skipping test to avoid overwriting.")
